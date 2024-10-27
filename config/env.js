@@ -21,4 +21,6 @@ module.exports = {
     jwtKey: process.env.JWT_KEY === undefined ? "" : process.env.JWT_KEY,
     omnivoreAPIKey: process.env.OMNIVORE_API_KEY === undefined ? "" : process.env.OMNIVORE_API_KEY,
     omnivoreAPIUrl: process.env.OMNIVORE_API_URL === undefined ? "" : process.env.OMNIVORE_API_URL,
+    serverUrl: process.env.URL === undefined ? "" : process.env.URL,
+
 };

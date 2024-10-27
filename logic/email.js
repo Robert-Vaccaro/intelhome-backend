@@ -84,9 +84,8 @@ exports.sendEarlyAccessEmail = async (userEmail, code) => {
                     <p>Cheers,</p>
                     <p>The PayTab Team</p>
                     
-                    <!-- Unsubscribe Link -->
                     <p style="margin-top: 30px; font-size: 12px; color: #555;">
-                    <a href="http://localhost:3001/users/unsubscribe-early-access?email=${userEmail}&code=${code}" onclick="unsubscribe(event)" style="color: #7a60ff; text-decoration: none;">Unsubscribe from early access emails</a>
+                    <a href="https://rocky-everglades-23449-48ef56fc7402.herokuapp.com/users/unsubscribe-early-access?email=${userEmail}&code=${code}" onclick="unsubscribe(event)" style="color: #7a60ff; text-decoration: none;">Unsubscribe from early access emails</a>
                     </p>
                 </div>
                 </body>
