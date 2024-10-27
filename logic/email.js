@@ -1,63 +1,8 @@
 const env = require('../config/env');
 var nodemailer = require('nodemailer');
 
-exports.sendEmail = async (req) => {
-    let { domaEmail, domaPW, appPass, email } = env;
-    var transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        service: 'gmail',
-        secure: false,
-        debug: false,
-        logger: true,
-        auth: {
-            user: domaEmail,
-            pass: domaPW
-        }
-    });
-
-    let urlString = env.awsLink + req.body.clientID + "/inspections/" + req.body.inspectionID;
-
-    // Dynamically generate image tags based on numOfImages
-    let imageTags = '';
-    const numOfImages = parseInt(req.body.numOfImages, 10); // Ensure it's an integer
-
-    for (let i = 0; i < numOfImages; i++) {
-        imageTags += `
-        <img style="width: 300px;height: auto; padding: 10px;" src="${urlString}/${i}.jpeg"></img>`;
-    }
-
-    var mailOptions = {
-        from: domaEmail,
-        to: domaEmail,
-        subject: `New ${req.body.submissionType + " Submission"} from ${req.body.clientName}`,
-        text: "",
-        html: `
-        <p style="border: 1px solid lightgray; border-radius: 10px;padding: 10px; width: 300px;">Inspection ID: ${req.body.inspectionID}</p>
-        <p style="border: 1px solid lightgray; border-radius: 10px;padding: 10px; width: 300px;">Client Name: ${req.body.clientName}</p>
-        <p style="border: 1px solid lightgray; border-radius: 10px;padding: 10px; width: 300px;">Client Email: ${req.body.clientEmail}</p>
-        <p style="border: 1px solid lightgray; border-radius: 10px;padding: 10px; width: 300px;">Client Type: ${req.body.senderType}</p>
-        <p style="border: 1px solid lightgray; border-radius: 10px;padding: 10px; width: 300px;">Client Address: ${req.body.address}</p>
-        <p style="border: 1px solid lightgray; border-radius: 10px;padding: 10px; width: 300px;">Number of Images: ${numOfImages}</p>
-        ${imageTags}
-        <p style="border: 1px solid lightgray; border-radius: 10px;padding: 10px; width: 300px;">Description: ${req.body.descrip}</p>
-        <div style="display: flex;justify-content: center;width: 300px;padding: 10px;">
-        </div>`
-    };
-
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            console.log("Error sending email:", error);
-        } else {
-            console.log("Successfully sent email");
-        }
-    });
-
-    return true;
-};
-
 exports.sendEmailCode = async (user, code) => {
-    let { domaEmail, domaPW, appPass, email } = env;
+    let { email, pw } = env;
     var transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -66,14 +11,14 @@ exports.sendEmailCode = async (user, code) => {
         debug: false,
         logger: true,
         auth: {
-            user: domaEmail,
-            pass: domaPW
+            user: email,
+            pass: pw
         }
     });
 
     var mailOptions = {
-        from: domaEmail,
-        to: user.email_address,
+        from: email,
+        to: user.email,
         subject: `Domalytx Email Verification`,
         text: "",
         html: `
@@ -102,9 +47,8 @@ exports.sendEmailCode = async (user, code) => {
     return true;
 };
 
-
-exports.sendInspectionBoostEmail = async (user, address) => {
-    let { domaEmail, domaPW, appPass, email } = env;
+exports.sendEarlyAccessEmail = async (userEmail, code) => {
+    let { email, pw } = env;
     var transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -113,25 +57,41 @@ exports.sendInspectionBoostEmail = async (user, address) => {
         debug: false,
         logger: true,
         auth: {
-            user: domaEmail,
-            pass: domaPW
+            user: email,
+            pass: pw
         }
     });
 
     var mailOptions = {
-        from: domaEmail,
-        to: domaEmail,
-        subject: `New Inspection Boost from: ${user.firstName} ${user.lastName}`,
+        from: email,
+        to: userEmail,
+        subject: `Welcome to PayTab`,
         text: "",
         html: `
-            <div style="font-family: Arial, sans-serif; font-size: 16px; color: #333;">
-                <h2 style="color: #4A90E2;">New Inspection Boost from:</h2>
-                <p>${user.firstName} ${user.lastName}</p>
-                <p>${user.email_address}</p>
-                <div style="background-color: #f2f2f2; padding: 10px 15px; max-width: 300px; margin: 10px 0; font-size: 24px; text-align: center; border-radius: 4px;">
-                    ${address}
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Welcome to PayTab</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; color: #333;">
+                <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd;">
+                    <h1 style="color: #7a60ff;">Welcome to PayTab!</h1>
+                    <p>Hi there,</p>
+                    <p>Thank you for signing up for early access to PayTab! We're excited to have you on board and can't wait for you to experience seamless payments at your favorite bars and restaurants.</p>
+                    <p>With PayTab, you can open and close your tab from your phone, skip the wait for the check, and even split bills effortlessly with friends. Enjoy the convenience and let us know if you have any questions along the way.</p>
+                    <p>Cheers,</p>
+                    <p>The PayTab Team</p>
+                    
+                    <!-- Unsubscribe Link -->
+                    <p style="margin-top: 30px; font-size: 12px; color: #555;">
+                    <a href="http://localhost:3001/users/unsubscribe-early-access?email=${userEmail}&code=${code}" onclick="unsubscribe(event)" style="color: #7a60ff; text-decoration: none;">Unsubscribe from early access emails</a>
+                    </p>
                 </div>
-            </div>
+                </body>
+                </html>
+
             `
     };
 
@@ -147,7 +107,7 @@ exports.sendInspectionBoostEmail = async (user, address) => {
 };
 
 exports.sendPasswordResetCode = async (user, code) => {
-    let { domaEmail, domaPW, appPass, email } = env;
+    let { email, pw } = env;
     var transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -156,14 +116,14 @@ exports.sendPasswordResetCode = async (user, code) => {
         debug: false,
         logger: true,
         auth: {
-            user: domaEmail,
-            pass: domaPW
+            user: domemailaEmail,
+            pass: pw
         }
     });
 
     var mailOptions = {
-        from: domaEmail,
-        to: user.email_address,
+        from: email,
+        to: user.email,
         subject: `Domalytx Password Reset`,
         text: "",
         html: `

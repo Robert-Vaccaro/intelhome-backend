@@ -2,22 +2,27 @@ const mongoose = require("mongoose");
 
 var userSchema = new mongoose.Schema(
   {
-    userId: { type: String, required: true, index: true },  // Index on userId for faster queries
-    email_address: { type: String, required: true, index: true },  // Index on email_address
-    password: { type: String, required: true },
-    type: { type: String },
-    firstName: { type: String },
-    lastName: { type: String },
-    profilePhoto: { type: String },
-    banned: { type: Boolean, default: false },  // Assuming banned is a Boolean
-    verified: { type: Boolean, default: false },
-    emailVerification: { type: Number },
-    DTString: { type: String },
+    userId: { type: String, required: true, index: true },
+    phone: { type: String, required: true, index: true },
+    email: { type: String, required: true, index: true },
+    role: { type: Array, default: []  },
+    firstName: { type: String, default: ""  },
+    lastName: { type: String, default: ""  },
+    profilePhoto: { type: String, default: ""  },
+    banned: { type: Boolean, default: false },
+    isLoggingIn: { type: Boolean, default: false },
+    phoneVerification: { type: Boolean, default: false },
+    phoneCode: { type: String, default: "" },
+    phoneCodeExp: { type: Number, default: 0 },
+    emailVerification: { type: Boolean, default: false },
+    emailCode: { type: String, default: "" },
+    emailCodeExp: { type: Number, default: 0 },
+    paymentMethods:  { type: Array, default: [] },
+    DTString: { type: String, default: "" },
   },
   {
-    timestamps: true,  // Automatically adds createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 
-// Export the model
 exports.users = mongoose.model("users", userSchema);

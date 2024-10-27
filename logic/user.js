@@ -1,69 +1,102 @@
-const bcrypt = require('bcrypt');
-const { db } = require('../config/database');
-let env = require('../config/env');
-const { decrypt, encrypt } = require('./encrypt');
 const { v4: uuidv4 } = require('uuid');
 const { users } = require('../schemas/user');
-const mongoose = require('mongoose');
+const { tickets } = require('../schemas/ticket');
 
-async function loginUser(email, password) {
-    try {
-
-        return user;
-    } catch (err) {
-        throw new Error('Login process failed');
-    }
-}
-
+const Roles = Object.freeze({
+  USER: "user",
+  ADMIN: "admin",
+  SUPER: "super",
+  OWNER: "owner",
+  EMPLOYEE: "employee"
+});
 
 async function createUser(userData) {
-    try {
-        // Step 1: Check if the email already exists
-        const existingUser = await users.findOne({ email_address: userData.email_address });
-        if (existingUser) {
-            // Instead of throwing, return an error object with status and message
-            return { 
-                error: true, 
-                status: 409,  // Conflict status code
-                message: "Email already exists. Please use a different email." 
-            };
-        }
+  try {
+    // Check if a user with the same phone or email already exists
+    const user = await users.findOne({
+      $or: [{ phone: userData.phone }, { email: userData.email }]
+    });
 
-        // Step 2: Hash password if not using an OAuth type (e.g., Google, Facebook)
-        let hashedPassword = "";
-        if (userData.type === "") {
-            hashedPassword = await bcrypt.hash(userData.password, 10);
-        }
-
-        // Step 3: Create new user object
-        const newUser = new users({
-            userId: userData.userId !== "" ? userData.userId : uuidv4(),
-            email_address: userData.email_address,
-            password: hashedPassword,
-            type: userData.type,
-            firstName: userData.firstName || "",
-            lastName: userData.lastName || "",
-            profilePhoto: userData.profilePhoto || "",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            banned: userData.banned || "false",
-            verified: false,
-            emailVerification: "",
-            DTString: new Date().toISOString(),
-        });
-
-        // Step 4: Save the new user to the database
-        const savedUser = await newUser.save();
-
-        // Return the created user
-        return savedUser;
-    } catch (error) {
-        return { 
-            error: true, 
-            status: 500,  // Internal Server Error
-            message: "Error creating user. Please try again later." 
-        };
+    if (user) {
+      // If a user with the same phone or email exists, return an error message
+      return { user, error: "User exists" };
     }
+
+    // Create a new user instance
+    const newUser = new users({
+      userId: uuidv4(),
+      phone: userData.phone,
+      email: userData.email,
+      role: [Roles.USER], // Set the default role to "user"
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      profilePhoto: "",
+      banned: false,
+      isLoggingIn: false,
+      phoneVerification: false,
+      phoneCode: "",
+      emailVerification: false,
+      emailCode: "",
+      paymentMethods: [],
+      DTString: userData.DTString || "",
+    });
+
+    // Save the new user to the database
+    await newUser.save();
+
+    // Return the created user
+    return { user: newUser };
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return { error: "Error creating user." };
+  }
 }
 
-module.exports = { loginUser, createUser };
+async function createTicket(userData) {
+  try {
+    const {
+          userId, 
+          ticketId,
+          locationId,
+          locationName,
+          name, 
+          guestCount, 
+          posId, 
+          discounts,
+          totals, 
+          employeeId, 
+          orderTypeId, 
+          revenueCenterId, 
+          tableId,
+          autoSend
+        } = userData
+
+    const newTicket = new tickets({
+      ticketId,
+      userId,
+      name,
+      locationId,
+      locationName,
+      guestCount,
+      open: true,
+      openedAt: new Date().getTime(),
+      posId,
+      discounts,
+      totals,
+      employeeId,
+      orderTypeId,
+      revenueCenterId,
+      tableId,
+      autoSend
+    });
+
+    let ticket = await newTicket.save();
+
+    return { ticket };
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return { error: "Error creating user." };
+  }
+}
+
+module.exports = { createUser, Roles, createTicket };  // Export the Roles enum too

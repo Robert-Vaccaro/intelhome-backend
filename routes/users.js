@@ -1,9 +1,9 @@
-var express = require('express');
-var router = express.Router();
+const router = require('express').Router();
+const { earlyAccess, unsubscribeEarlyAccess } = require('../controllers/user.js');
+const authMiddleware = require('../middleware/auth.middleware.js');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+// router.post('/test',  userController.register);
 
+router.post('/early-access', earlyAccess);
+router.get('/unsubscribe-early-access', unsubscribeEarlyAccess);
 module.exports = router;
