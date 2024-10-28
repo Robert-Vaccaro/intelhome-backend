@@ -48,7 +48,7 @@ exports.unsubscribeEarlyAccess = async (req, res) => {
             await subscriber.save();
             res.status(200).render('unsubscribe-success', { message: "You have been successfully unsubscribed from early access." });
         } else {
-            res.status(404).render('unsubscribe-error', { error: "Invalid email or code. Please try again." });
+            res.status(404).render('unsubscribe-error', { error: "Please check your unsubscribe link or contact support if you continue to experience issues." });
         }
     } catch (err) {
         console.error(err);
