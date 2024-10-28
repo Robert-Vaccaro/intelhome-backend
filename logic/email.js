@@ -75,22 +75,38 @@ exports.sendEarlyAccessEmail = async (userEmail, code) => {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Welcome to PayTab</title>
                 </head>
-                <body style="font-family: Arial, sans-serif; color: #333;">
-                <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd;">
-                    <h1 style="color: #7a60ff;">Welcome to PayTab!</h1>
-                    <p>Hi there,</p>
-                    <p>Thank you for signing up for early access to PayTab! We're excited to have you on board and can't wait for you to experience seamless payments at your favorite bars and restaurants.</p>
-                    <p>With PayTab, you can open and close your tab from your phone, skip the wait for the check, and even split bills effortlessly with friends. Enjoy the convenience and let us know if you have any questions along the way.</p>
-                    <p>Cheers,</p>
-                    <p>The PayTab Team</p>
+                <body style="font-family: 'Poppins', sans-serif; color: rgba(186, 104, 200, 1); background-color: #000; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
+                <div style="max-width: 600px; background-color: #1a1a1a; padding: 30px; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); text-align: center;">
+                    <!-- Title -->
+                    <h1 style="color: rgba(186, 104, 200, 1); font-size: 2rem; font-weight: 600; margin-bottom: 20px;">Welcome to PayTab!</h1>
                     
-                    <p style="margin-top: 30px; font-size: 12px; color: #555;">
-                    <a href="https://rocky-everglades-23449-48ef56fc7402.herokuapp.com/users/unsubscribe-early-access?email=${userEmail}&code=${code}" onclick="unsubscribe(event)" style="color: #7a60ff; text-decoration: none;">Unsubscribe from early access emails</a>
+                    <!-- Introduction Text -->
+                    <p style="font-size: 1rem; color: rgba(186, 104, 200, 0.8); line-height: 1.5;">
+                    Hi there,
+                    </p>
+                    
+                    <!-- Body Text -->
+                    <p style="font-size: 1rem; color: rgba(186, 104, 200, 0.8); line-height: 1.5;">
+                    Thank you for signing up for early access to PayTab! We're excited to have you on board and can't wait for you to experience seamless payments at your favorite bars and restaurants.
+                    </p>
+                    
+                    <p style="font-size: 1rem; color: rgba(186, 104, 200, 0.8); line-height: 1.5;">
+                    With PayTab, you can open and close your tab from your phone, skip the wait for the check, and even split bills effortlessly with friends. You'll be the first to know when we officially launch.
+                    </p>
+                    
+                    <!-- Closing Text -->
+                    <p style="font-size: 1rem; color: rgba(186, 104, 200, 0.8); line-height: 1.5;">
+                    Cheers,<br>
+                    The PayTab Team
+                    </p>
+                    
+                    <!-- Unsubscribe Link -->
+                    <p style="margin-top: 30px; font-size: 0.8rem; color: rgba(186, 104, 200, 0.6);">
+                    <a href="https://rocky-everglades-23449-48ef56fc7402.herokuapp.com/users/unsubscribe-early-access?email=${userEmail}&code=${code}" style="color: rgba(186, 104, 200, 1); text-decoration: none;">Unsubscribe from early access emails</a>
                     </p>
                 </div>
                 </body>
                 </html>
-
             `
     };
 
