@@ -76,7 +76,7 @@ exports.sendEarlyAccessEmail = async (userEmail, code) => {
                 <title>Welcome to PayTab</title>
                 </head>
                 <body style="font-family: 'Poppins', sans-serif; color: rgba(186, 104, 200, 1); background-color: #000; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0;">
-                <div style="max-width: 600px; background-color: #1a1a1a; padding: 30px; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); text-align: center;">
+                <div style="max-width: 600px; background-color: #1a1a1a; padding: 30px; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); text-align: left;">
                     <!-- Title -->
                     <h1 style="color: rgba(186, 104, 200, 1); font-size: 2rem; font-weight: 600; margin-bottom: 20px;">Welcome to PayTab!</h1>
                     
