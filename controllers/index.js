@@ -1,6 +1,6 @@
 const moment = require('moment-timezone');
 const jwt = require('jsonwebtoken');
-const { loginUser, createUser, submitInspectionInfo } = require('../logic/user');
+const { loginUser, createUser, submitInspectionInfo, getCurrentTime } = require('../logic/user');
 const { generateTokens } = require('../logic/tokens');
 const env = require('../config/env');
 const bcrypt = require('bcryptjs');  // bcrypt to compare hashed password
@@ -69,7 +69,7 @@ exports.signIn = async (req, res) => {
             user.phoneCode = code;
             user.isLoggingIn = true;
             user.DTString = DTString || ""
-            user.phoneCodeExp = new Date().getTime(); // Save current time in epoch milliseconds
+            user.phoneCodeExp = getCurrentTime(); // Save current time in epoch milliseconds
             let updatedUser = await user.save();
             let results = await sendSms(user.phone, code);
         }
@@ -87,7 +87,7 @@ exports.checkPhoneCode = async (req, res) => {
         const user = await users.findOne({ phone });
         
         if (user) {
-            const currentTime = new Date().getTime(); // Current time in epoch milliseconds
+            const currentTime = getCurrentTime(); // Current time in epoch milliseconds
             const tenMinutes = 10 * 60 * 1000; // 10 minutes in milliseconds
             
             if (user.phoneCode && parseInt(code) === user.phoneCode) {
@@ -147,7 +147,7 @@ exports.phoneCode = async (req, res) => {
         if (user && user.isLoggingIn) {
             let phoneCode = generateCode()
             user.phoneCode = phoneCode
-            user.phoneCodeExp = new Date().getTime();
+            user.phoneCodeExp = getCurrentTime();
             user = await user.save()
             let sendSmsResults = await sendSms(user.phone, phoneCode)
         }
@@ -192,7 +192,7 @@ exports.emailCode = async (req, res) => {
         if (user && user.isLoggingIn) {
             let emailCode = generateCode()
             user.emailCode = emailCode
-            user.emailCodeExp = new Date().getTime();
+            user.emailCodeExp = getCurrentTime();
             user = await user.save()
             let sendEmailCodeResults = await sendEmailCode(user, emailCode)
         }

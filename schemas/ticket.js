@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const moment = require("moment-timezone");
 
 var ticketSchema = new mongoose.Schema(
   {
@@ -6,23 +7,10 @@ var ticketSchema = new mongoose.Schema(
     userId: { type: String, required: true, index: true },
     locationId: { type: String, required: true, index: true },
     locationName: { type: String },
-    name: { type: String },
-    closedAt: { type: String},
-    guestCount: { type: String },
+    ticketName: { type: String, default: "New Ticket" },
     open: { type: Boolean, default: true },
-    openedAt: { type: Number },
-    paid: { type: Boolean, default: false },
-    paidAt: { type: Number },
-    posId: { type: Number },
-    discounts: { type: Array },
-    totals: { type: Object },
-    void: { type: Boolean },
-    employeeId: { type: String },
-    orderTypeId: { type: String },
-    revenueCenterId: { type: String },
-    tableId: { type: String },
+    openedAt: { type: Number, default: () => moment(moment().tz(moment.tz.guess())).unix() }, // Inline function
     otherUsers: { type: Array, default: [] },
-    autoSend: { type: Boolean },
   },
   {
     timestamps: true,

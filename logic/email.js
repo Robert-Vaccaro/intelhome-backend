@@ -48,20 +48,30 @@ exports.sendEmailCode = async (user, code) => {
 };
 
 exports.sendEarlyAccessEmail = async (userEmail, code) => {
-    let { email, pw } = env;
-    var transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        service: 'gmail',
-        secure: false,
-        debug: false,
-        logger: true,
+    let { email, pw, helloEmail, helloPw } = env;
+    // var transporter = nodemailer.createTransport({
+    //     host: 'smtp.gmail.com',
+    //     port: 587,
+    //     service: 'gmail',
+    //     secure: false,
+    //     debug: false,
+    //     logger: true,
+    //     auth: {
+    //         user: email,
+    //         pass: pw
+    //     }
+    // });
+
+    const transporter = nodemailer.createTransport({
+        host: 'mail.privateemail.com',
+        port: 465, // Use 465 for SSL, or 587 for TLS
+        secure: true, // true for 465, false for other ports
         auth: {
-            user: email,
-            pass: pw
+            user: helloEmail, // Your Private Email address
+            pass: helloPw // Your Private Email password
         }
     });
-
+    
     var mailOptions = {
         from: email,
         to: userEmail,

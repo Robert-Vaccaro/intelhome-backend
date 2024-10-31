@@ -1,6 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const { users } = require('../schemas/user');
 const { tickets } = require('../schemas/ticket');
+const moment = require('moment-timezone');
 
 const Roles = Object.freeze({
   USER: "user",
@@ -59,35 +60,13 @@ async function createTicket(userData) {
           ticketId,
           locationId,
           locationName,
-          name, 
-          guestCount, 
-          posId, 
-          discounts,
-          totals, 
-          employeeId, 
-          orderTypeId, 
-          revenueCenterId, 
-          tableId,
-          autoSend
         } = userData
 
     const newTicket = new tickets({
       ticketId,
       userId,
-      name,
       locationId,
       locationName,
-      guestCount,
-      open: true,
-      openedAt: new Date().getTime(),
-      posId,
-      discounts,
-      totals,
-      employeeId,
-      orderTypeId,
-      revenueCenterId,
-      tableId,
-      autoSend
     });
 
     let ticket = await newTicket.save();
@@ -99,4 +78,8 @@ async function createTicket(userData) {
   }
 }
 
-module.exports = { createUser, Roles, createTicket };  // Export the Roles enum too
+function getCurrentTime() {
+  return moment(moment().tz(moment.tz.guess())).unix();
+}
+
+module.exports = { createUser, Roles, createTicket, getCurrentTime };  // Export the Roles enum too

@@ -2,7 +2,9 @@ const { makeAPICall, processPayment } = require("../logic/omnivore");
 const axios = require('axios');
 const { users } = require('../schemas/user');
 const { tickets } = require('../schemas/ticket');
-const { createTicket } = require("../logic/user");
+const { createTicket, getCurrentTime } = require("../logic/user");
+const { saveCreditCard } = require("../logic/creditCard");
+var moment = require('moment-timezone');
 
 exports.test = async (req, res) => {
     try {
@@ -12,6 +14,22 @@ exports.test = async (req, res) => {
         return res.status(500).json({ error: "Server Error" });
     }
 };
+
+exports.getTicket = async (req, res) => {
+    try {
+        const { userId, ticketId, locationId } = req.query;
+        let userTicket = await makeAPICall(`/locations/${locationId}/tickets/${ticketId}`, 'GET');
+        console.log(userTicket.data._embedded.items)
+        userTicket = userTicket.data
+        if (!userTicket) {
+            return res.status(204).json({ message: "No Ticket Data" });
+        }
+        return res.status(200).json({ message: "Success", userTicket });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ error: "Server Error" });
+    }
+}
 
 exports.getTickets = async (req, res) => {
     try {
@@ -26,6 +44,8 @@ exports.getTickets = async (req, res) => {
         return res.status(500).json({ error: "Server Error" });
     }
 }
+
+
 
 // exports.getTicketsPerLocation = async (req, res) => {
 //     try {
@@ -96,6 +116,7 @@ exports.getLocationInfo = async (req, res) => {
         // console.log("locationInfo: ", locationInfo)
         return res.status(200).json({ message: "Success", locationInfo });
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ error: "Error getting location info" });
 
     }
@@ -103,32 +124,47 @@ exports.getLocationInfo = async (req, res) => {
 
 exports.getLocationMenu = async (req, res) => {
     try {
-        const { locationId } = req.body
-        console.log("getLocationMenu ")
+        const { userId, locationId } = req.query
         let items = await makeAPICall(`/locations/${locationId}/menu/items`)
         // console.log("menu_categories: ",items.data._embedded.menu_items[0]._embedded.menu_categories)
         // console.log("option_sets: ",items.data._embedded.menu_items[0]._links.option_sets)
         // console.log("price_levels: ",items.data._embedded.menu_items[0]._embedded.price_levels)
-
-        return res.status(200).json({ message: "Success", locationInfo });
+        let menuItems = items.data._embedded.menu_items
+        console.log(menuItems)
+        if (!menuItems) {
+            return res.status(204).json({ message: "No Data", menuItems: [] });
+        }
+        return res.status(200).json({ message: "Success", menuItems });
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ error: "Error getting location info" });
 
     }
 }
 
-exports.getLocationMenu = async (req, res) => {
+exports.addItemsToTicket = async (req, res) => {
     try {
-        const { locationId, ticketId, items} = req.body
-        let addItemsResponse = await makeAPICall(`/locations/${locationId}/tickets/${ticketId}/items`, params=items)
-        // console.log("addItemsResponse: ",addItemsResponse)
+        const { locationId, ticketId, items } = req.body;
 
-        return res.status(200).json({ message: "Success", locationInfo });
+        if (items && items.length > 0) {
+            const newList = items.map(item => ({ menu_item: item }));
+
+            let addItemsResponse = await makeAPICall(
+                `/locations/${locationId}/tickets/${ticketId}/items`, 'POST',
+                params = newList
+            );
+
+            console.log("addItemsResponse: ", addItemsResponse);
+            return res.status(200).json({ message: "Success" });
+        } else {
+            return res.status(204).json({ message: "No items to add" });
+        }
     } catch (error) {
-        return res.status(500).json({ error: "Error getting location info" });
-
+        console.error("Error adding items to ticket:", error);
+        return res.status(500).json({ error: "Server Error" });
     }
-}
+};
+
 
 exports.openTicket = async (req, res) => {
     try {
@@ -157,24 +193,16 @@ exports.openTicket = async (req, res) => {
                 ticketId: ticket.data.id, 
                 locationId,
                 locationName,
-                name: ticket.data.name, 
-                guestCount: ticket.data.guest_count, 
-                posId: ticket.data.pos_id, 
-                discounts: ticket.data.totals.discounts, 
-                totals: ticket.data.totals, 
-                employeeId, 
-                orderTypeId, 
-                revenueCenterId,
-                tableId,
-                autoSend
+                ticketName: ticket.data.name
             };
         
             let newTicket = await createTicket(userData);
             if (newTicket) {
                 return res.status(201).json({ message: "Success" });
+            } else {
+                return res.status(500).json({ error: "Ticket Creation Error"  });
             }
         }
-        
 
     } catch (err) {
         console.log(err)
@@ -211,13 +239,12 @@ exports.payTicket = async(req, res) => {
         let payment = await processPayment(locationId, ticketId, paymentPayload)
         console.log("payment: ", payment?._embedded?.ticket);
         if (payment === "ticket_closed") {
-            console.log("Ticket Already Closed")
             ticket.open = false
-            ticket.openedAt = new Date().getTime()
-            ticket.paid = true
-            ticket.paidAt = new Date().getTime()
+            ticket.openedAt = getCurrentTime()
+
             await ticket.save()
-            return res.status(409).json({ error: "Ticket already closed" });
+            console.log("Ticket Already Closed")
+            return res.status(204).json({ error: "Ticket already closed" });
         }
         let currTicket = payment?._embedded?.ticket 
         if (!currTicket) {
@@ -225,29 +252,14 @@ exports.payTicket = async(req, res) => {
             return res.status(409).json({ error: "Payment was not successful" });
         }
         if (currTicket.open === false) {
-            console.log("Tip0: ", tip);
-            console.log("Tip1: ", ticket.totals.tips);
-            
-            // Update the tips field and mark it as modified
-            ticket.totals.tips = (ticket.totals.tips || 0) + tip;
-            ticket.markModified('totals.tips');  // Mark the nested field as modified
-            
-            console.log("Tip2: ", ticket.totals.tips);
-            
-            // Update other fields
             ticket.open = false;
             ticket.openedAt = currTicket.openAt;
-            ticket.paid = true;
-            ticket.paidAt = new Date().getTime();
             
-            // Save the ticket
-            let results = await ticket.save();
-            console.log("currTicket.open false: ", currTicket.open);
-            
+            let results = await ticket.save();            
             return res.status(200).json({ message: "Payment successful" });
         } else {
             console.log("currTicket.open true: ", currTicket.open);
-            return res.status(409).json({ message: "Payment was not successful" });
+            return res.status(204).json({ message: "Payment was not successful" });
         }
     } catch (error) {
         console.log(error)
@@ -256,13 +268,10 @@ exports.payTicket = async(req, res) => {
             const ticket = await tickets.findOne({ticketId});
             if (ticket) {
                 ticket.open = false
-                ticket.openedAt = new Date().getTime()
-                ticket.paid = true
-                ticket.paidAt = new Date().getTime()
+                ticket.openedAt = getCurrentTime()
                 await ticket.save()
             }
         }
         return res.status(500).json({ error: "Server Error" });
     }
 }
-
