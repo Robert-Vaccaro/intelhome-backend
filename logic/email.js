@@ -73,7 +73,7 @@ exports.sendEarlyAccessEmail = async (userEmail, code) => {
     });
     
     var mailOptions = {
-        from: email,
+        from: helloEmail,
         to: userEmail,
         subject: `Welcome to PayTab`,
         text: "",
