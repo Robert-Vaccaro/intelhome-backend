@@ -1,38 +1,44 @@
 const env = require('../config/env');
 var nodemailer = require('nodemailer');
 
-exports.sendEmailCode = async (user, code) => {
-    let { email, pw } = env;
-    var transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        service: 'gmail',
-        secure: false,
-        debug: false,
-        logger: true,
+exports.sendEmailCode = async (email, code) => {
+    let { helloEmail, helloPw } = env;
+    const transporter = nodemailer.createTransport({
+        host: 'mail.privateemail.com',
+        port: 465, // Use 465 for SSL, or 587 for TLS
+        secure: true, // true for 465, false for other ports
         auth: {
-            user: email,
-            pass: pw
+            user: helloEmail,
+            pass: helloPw
         }
     });
 
     var mailOptions = {
-        from: email,
-        to: user.email,
-        subject: `Domalytx Email Verification`,
+        from: helloEmail,
+        to: email,
+        subject: `PayTab Email Verification`,
         text: "",
         html: `
-            <div style="font-family: Arial, sans-serif; font-size: 16px; color: #333;">
-                <h2 style="color: #4A90E2;">Email Verification Code</h2>
-                <p>Hello,</p>
-                <p>Thank you for registering with Domalytx. Please use the following code to complete your registration process.</p>
-                <div style="background-color: #f2f2f2; padding: 10px 15px; max-width: 300px; margin: 10px 0; font-size: 24px; text-align: center; border-radius: 4px;">
-                    ${code}
-                </div>
-                <p>This code is valid for 10 minutes and can only be used once.</p>
-                <p>If you did not request this code, please ignore this email.</p>
-                <p>Thank you,<br>Your Company Team</p>
-            </div>
+                <body style="font-family: 'Poppins', sans-serif; color: rgba(186, 104, 200, 1); background-color: #000; padding: 20px; display: flex; justify-content: center; align-items: center; margin: 0;">
+                    <div style="max-width: 600px; background-color: #1a1a1a; padding: 30px; border-radius: 8px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); text-align: left;">
+                        <h1 style="color: rgba(186, 104, 200, 1); font-size: 2rem; font-weight: 600; margin-bottom: 20px;">Email Verification</h1>
+                        <p style="font-size: 1rem; color: rgba(186, 104, 200, 0.8); line-height: 1.5;">
+                            Hello,
+                        </p>
+                        <p style="font-size: 1rem; color: rgba(186, 104, 200, 0.8); line-height: 1.5;">
+                            Please use the following code to complete your registration process:
+                        </p>
+                        <p style="font-size: 1.5rem; color: white; background-color: gray; line-height: 1.5; padding: 5px 10px; border-radius: 10px; display: inline-block;">
+                            ${code}
+                        </p>
+                        <p style="font-size: 1rem; color: rgba(186, 104, 200, 0.8); line-height: 1.5;">
+                            Cheers,<br>
+                            The PayTab Team
+                        </p>
+                        <p style="margin-top: 30px; font-size: 0.8rem; color: rgba(186, 104, 200, 0.6);">
+                        </p>
+                    </div>
+                </body>
             `
     };
 

@@ -11,11 +11,11 @@ const Roles = Object.freeze({
   EMPLOYEE: "employee"
 });
 
-async function createUser(userData) {
+async function createUser(phone) {
   try {
     // Check if a user with the same phone or email already exists
     const user = await users.findOne({
-      $or: [{ phone: userData.phone }, { email: userData.email }]
+      $or: [{ phone: phone }]
     });
 
     if (user) {
@@ -26,11 +26,11 @@ async function createUser(userData) {
     // Create a new user instance
     const newUser = new users({
       userId: uuidv4(),
-      phone: userData.phone,
-      email: userData.email,
+      phone: phone,
+      email: "",
       role: [Roles.USER], // Set the default role to "user"
-      firstName: userData.firstName,
-      lastName: userData.lastName,
+      firstName: "",
+      lastName: "",
       profilePhoto: "",
       banned: false,
       isLoggingIn: false,
@@ -39,7 +39,7 @@ async function createUser(userData) {
       emailVerification: false,
       emailCode: "",
       paymentMethods: [],
-      DTString: userData.DTString || "",
+      DTString: "",
     });
 
     // Save the new user to the database

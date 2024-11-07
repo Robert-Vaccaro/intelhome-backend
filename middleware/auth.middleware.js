@@ -8,7 +8,8 @@ module.exports = (req, res, next) => {
     }
     try {
         const decoded = jwt.verify(token, env.jwtKey);
-        if (decoded) {
+        if (decoded && decoded.userId) {
+            req.decodedUserId = decoded.userId;
             next();
         } else {
             return res.status(401).json({ message: 'Authorization denied: Invalid token' });
