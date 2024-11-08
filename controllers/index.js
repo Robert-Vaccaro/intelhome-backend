@@ -62,10 +62,16 @@ exports.credCheck = async (req, res) => {
 
 exports.signIn = async (req, res) => {
     try {
-        const { phone, DTString } = req.body;
+        const { phone, demoPW, DTString } = req.body;
         const user = await users.findOne({ phone });
         if (user) {
             const newTokens = generateTokens(user.userId);
+            if (demoPW && demoPW === env.demoPW) {
+                return res.status(200).json({
+                    user,
+                    tokens: newTokens
+                });
+            }
             const code = generateCode();
             user.phoneCode = code;
             user.isLoggingIn = true;

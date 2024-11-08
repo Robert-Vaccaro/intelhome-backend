@@ -24,4 +24,5 @@ module.exports = {
     omnivoreAPIKey: process.env.OMNIVORE_API_KEY === undefined ? "" : process.env.OMNIVORE_API_KEY,
     omnivoreAPIUrl: process.env.OMNIVORE_API_URL === undefined ? "" : process.env.OMNIVORE_API_URL,
     serverUrl: process.env.URL === undefined ? "" : process.env.URL,
+    demoPW: process.env.demoPW === undefined ? "" : process.env.demoPW,
 };
