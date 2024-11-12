@@ -79,7 +79,7 @@ exports.getLocations = async (req, res) => {
 
         let locationData = await makeAPICall(`/locations`, 'GET', latLongParams);
         // console.log("locations: ", locations.data._embedded.locations);
-        let locations = locationData.data._embedded.locations
+        let locations = locationData.data?._embedded?.locations
         if (locations) {
             return res.status(200).json({ message: "Success", locations });
         }
