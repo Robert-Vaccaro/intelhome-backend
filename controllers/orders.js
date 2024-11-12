@@ -85,6 +85,7 @@ exports.getLocations = async (req, res) => {
         }
         return res.status(200).json({ error: "No Locations", locations: null });
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ error: "No Locations" });
     }
 }
