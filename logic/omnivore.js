@@ -54,7 +54,6 @@ exports.processPayment = async (locationId, ticketId, paymentPayload) => {
                 'Api-Key': process.env.OMNIVORE_API_KEY  // Ensure your API key is set in the environment variables
             }
         });
-        console.log(response.data)
         // Return the value of 'open' inside the '_embedded.ticket' from the response
         return response.data;
     } catch (error) {

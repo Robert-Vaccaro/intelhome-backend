@@ -38,7 +38,7 @@ async function createUser(phone) {
       phoneCode: "",
       emailVerification: false,
       emailCode: "",
-      paymentMethods: [],
+      paymentMethods: ['3e1af2f5-014a-4cc2-a40e-09f609f66b68'],
       DTString: "",
     });
 

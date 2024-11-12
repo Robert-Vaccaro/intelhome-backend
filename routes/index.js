@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { credCheck, signIn, register, phoneCode, emailCode, refreshToken, checkPhoneCode, checkEmailCode } = require('../controllers/index.js');
+const { credCheck, signIn, register, phoneCode, emailCode, refreshToken, checkPhoneCode, checkEmailCode, saveName } = require('../controllers/index.js');
 const authMiddleware = require('../middleware/auth.middleware.js');
 
 router.get('/', (req, res) => {
@@ -13,5 +13,6 @@ router.post('/phone-code', authMiddleware, phoneCode);
 router.post('/check-phone-code', authMiddleware, checkPhoneCode);
 router.post('/check-email-code', authMiddleware, checkEmailCode);
 router.post('/email-code', authMiddleware, emailCode);
+router.post('/save-name', authMiddleware, saveName);
 
 module.exports = router;

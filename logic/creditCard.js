@@ -3,8 +3,9 @@ const { creditCards } = require('../schemas/cards');
 const { users } = require('../schemas/user');
 const { v4: uuidv4 } = require('uuid');
 
-exports.saveCreditCard = async ({ userId, cardName, number, cvc2, expMonth, expYear, verified = false, defaultCard = false }) => {
+exports.saveCreditCard = async ({ userId, cardName, number, cvc2, expMonth, expYear, defaultCard, verified = false}) => {
     try {
+        // Prepare card data for encryption
         const cardData = {
             number: number,
             cvc2: cvc2,
@@ -15,31 +16,43 @@ exports.saveCreditCard = async ({ userId, cardName, number, cvc2, expMonth, expY
         const encryptedCardData = encrypt(cardDataHex);
         const id = uuidv4();
 
+        // Create a new credit card entry
         const newCreditCard = new creditCards({
             userId,
             cardId: id,
-            cardName: cardName !== "" ? cardName :"No Card Name",
+            cardName: cardName !== "" ? cardName : "No Card Name",
             cardData: encryptedCardData,
             verified,
             default: defaultCard,
         });
+
+        // If the new card is marked as default, set all other cards' default to false
+        if (defaultCard) {
+            await creditCards.updateMany({ userId, default: true }, { $set: { default: false } });
+        }
+
+        // Save the new credit card
         const savedCard = await newCreditCard.save();
         console.log("Credit card saved successfully");
-        const updatedUser = await users.findOneAndUpdate(
+
+        // Update the user's paymentMethods array with the new card ID
+        await users.findOneAndUpdate(
             { userId },
             { $addToSet: { paymentMethods: savedCard.cardId } },
             { new: true }
         );
+
         console.log("Updated user with new payment method");
-        await getCreditCardDetails(savedCard.cardId)
-        return { "message": "Success" };
+
+        return { message: "Success" };
     } catch (error) {
         console.error("Error saving credit card or updating user:", error);
         throw error;
     }
 };
 
-const getCreditCardDetails = async (cardId) => {
+
+exports.getCardDetails = async (cardId) => {
     try {
         // Retrieve the credit card document based on cardId
         const creditCard = await creditCards.findOne({ cardId });
@@ -54,10 +67,6 @@ const getCreditCardDetails = async (cardId) => {
         // Convert the hex back to a JSON string and parse it
         const cardDataJSON = Buffer.from(cardDataHex, 'hex').toString();
         const cardData = JSON.parse(cardDataJSON);
-
-        // Log the decrypted card data
-        console.log("Decrypted Credit Card Data:", cardData);
-
         return cardData;
     } catch (error) {
         console.error("Error retrieving or decrypting credit card data:", error);

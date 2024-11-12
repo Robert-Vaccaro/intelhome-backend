@@ -73,29 +73,54 @@ exports.getCards = async (req, res) => {
                 }
                 return new Date(b.createdAt) - new Date(a.createdAt); // Newest first by createdAt
             });
-
         return res.status(200).json(sortedPaymentMethods);
     } catch (error) {
         console.error("Error retrieving payment methods:", error);
         return res.status(500).json({ error: "Server Error" });
     }
 };
+
 exports.deleteCard = async (req, res) => {
     try {
-        const { userId, cardId } = req.body;
+        const userId = req.decodedUserId;
+        const { cardId } = req.body;
+
+        // Find the user
         const user = await users.findOne({ userId });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
-        const card = await creditCards.findOneAndDelete({ userId, cardId });
-        if (!card) {
-            return res.status(404).json({ error: "Card not found" });
+
+
+        // Check if there are any other cards left
+        if (user.paymentMethods.length > 1) {
+            const card = await creditCards.findOneAndDelete({ userId, cardId });
+            if (!card) {
+                return res.status(404).json({ error: "Card not found" });
+            }
+
+            // Remove the card from user's paymentMethods array
+            const index = user.paymentMethods.indexOf(cardId);
+            if (index > -1) {
+                user.paymentMethods.splice(index, 1);
+            }
+
+            // Make the next card in the array the default
+            const newDefaultCardId = user.paymentMethods[0];
+            await creditCards.updateMany({ userId, default: true }, { $set: { default: false } });
+            await creditCards.findOneAndUpdate(
+                { userId, cardId: newDefaultCardId },
+                { $set: { default: true } },
+                { new: true }
+            );
+        } else {
+            // If no cards are left, return an error
+            return res.status(400).json({ error: "You must have at least one credit card on file." });
         }
-        const index = user.paymentMethods.indexOf(cardId);
-        if (index > -1) {
-            user.paymentMethods.splice(index, 1);
-        }
+
+        // Save updated user document
         await user.save();
+        
         return res.status(200).json({ message: "Card deleted successfully" });
     } catch (err) {
         console.error(err);
@@ -103,9 +128,11 @@ exports.deleteCard = async (req, res) => {
     }
 };
 
+
 exports.defaultCard = async (req, res) => {
     try {
-        const { userId, cardId } = req.body;
+        const userId = req.decodedUserId;
+        const { cardId } = req.body;
         const user = await users.findOne({ userId });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -126,19 +153,39 @@ exports.defaultCard = async (req, res) => {
     }
 };
 
-
-
-
 exports.saveCard = async (req, res) => {
     try {
-        console.log(req.body)
+        const userId = req.decodedUserId;
+        const { cardId } = req.body;
         const saveCardResult = saveCreditCard(req.body)
+
         return res.status(200).json({ message: "Card Saved" });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Server Error" });
     }
 };
+
+
+exports.saveLocation = async (req, res) => {
+    try {
+        const { lat, long, address } = req.body
+        const userId = req.decodedUserId || "";
+        const user = await users.findOne({ userId });
+        if (user) {
+            user.coords = [lat, long] || []
+            user.address = address || ""
+            await user.save()
+            return res.status(200).json({ message: "Location Saved", user });
+        } else {
+            return res.status(404).json({ message: "User Doesn't Exist" });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Server Error" });
+    }
+};
+
 
 exports.earlyAccess = async (req, res) => {
     try {

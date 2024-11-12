@@ -4,7 +4,7 @@ var userSchema = new mongoose.Schema(
   {
     userId: { type: String, required: true, index: true },
     phone: { type: String, required: true, index: true },
-    email: { type: String, index: true },
+    email: { type: String, index: true, default: ""},
     role: { type: Array, default: []  },
     firstName: { type: String, default: ""  },
     lastName: { type: String, default: ""  },
@@ -17,6 +17,8 @@ var userSchema = new mongoose.Schema(
     emailVerification: { type: Boolean, default: false },
     emailCode: { type: String, default: "" },
     emailCodeExp: { type: Number, default: 0 },
+    coords: { type: Array, default: [] },
+    address: { type: String, default: "" },
     paymentMethods:  { type: Array, default: [] },
     DTString: { type: String, default: "" },
   },

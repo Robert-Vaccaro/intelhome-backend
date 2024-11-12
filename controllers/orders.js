@@ -3,7 +3,7 @@ const axios = require('axios');
 const { users } = require('../schemas/user');
 const { tickets } = require('../schemas/ticket');
 const { createTicket, getCurrentTime } = require("../logic/user");
-const { saveCreditCard } = require("../logic/creditCard");
+const { saveCreditCard, getCardDetails } = require("../logic/creditCard");
 var moment = require('moment-timezone');
 
 exports.test = async (req, res) => {
@@ -19,7 +19,6 @@ exports.getTicket = async (req, res) => {
     try {
         const { userId, ticketId, locationId } = req.query;
         let userTicket = await makeAPICall(`/locations/${locationId}/tickets/${ticketId}`, 'GET');
-        console.log(userTicket.data._embedded.items)
         userTicket = userTicket.data
         if (!userTicket) {
             return res.status(204).json({ message: "No Ticket Data" });
@@ -130,7 +129,6 @@ exports.getLocationMenu = async (req, res) => {
         // console.log("option_sets: ",items.data._embedded.menu_items[0]._links.option_sets)
         // console.log("price_levels: ",items.data._embedded.menu_items[0]._embedded.price_levels)
         let menuItems = items.data._embedded.menu_items
-        console.log(menuItems)
         if (!menuItems) {
             return res.status(204).json({ message: "No Data", menuItems: [] });
         }
@@ -154,7 +152,6 @@ exports.addItemsToTicket = async (req, res) => {
                 params = newList
             );
 
-            console.log("addItemsResponse: ", addItemsResponse);
             return res.status(200).json({ message: "Success" });
         } else {
             return res.status(204).json({ message: "No items to add" });
@@ -212,7 +209,7 @@ exports.openTicket = async (req, res) => {
 
 exports.payTicket = async(req, res) => {
     try {
-        const { userId, locationId, ticketId, amount, tip } = req.body
+        const { userId, cardId, locationId, ticketId, amount, tip } = req.body
         console.log(tip)
         const user = await users.findOne({userId});
 
@@ -224,20 +221,21 @@ exports.payTicket = async(req, res) => {
         if (!ticket) {
           return { ticket, error: "Ticket does not exists" };
         }
+        const cardDetails = await getCardDetails(cardId)
         const paymentPayload = {
             amount: amount, 
             card_info: {
-                exp_month: 1,
-                exp_year: 2025,
-                cvc2: "123",
-                number: "4111111111111111"
+                exp_month: parseInt(cardDetails.expMonth),
+                exp_year: parseInt(cardDetails.expYear),
+                cvc2: cardDetails.cvc2,
+                number: cardDetails.number
             },
             tip: tip,
             type: "card_not_present"
         };
 
         let payment = await processPayment(locationId, ticketId, paymentPayload)
-        console.log("payment: ", payment?._embedded?.ticket);
+        // console.log("payment: ", payment?._embedded?.ticket);
         if (payment === "ticket_closed") {
             ticket.open = false
             ticket.openedAt = getCurrentTime()
