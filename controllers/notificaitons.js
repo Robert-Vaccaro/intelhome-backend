@@ -118,10 +118,10 @@ const checkAllDevicesForUpdates = async () => {
 
 exports.startDeviceCheck = async () => {
   // Schedule the task for 5:30 PM PST/PDT
-  const job = schedule.scheduleJob({ hour: 17, minute: 30, tz: 'America/Los_Angeles' }, async () => {
-    console.log('Scheduled task triggered');
+  // const job = schedule.scheduleJob({ hour: 17, minute: 30, tz: 'America/Los_Angeles' }, async () => {
+  //   console.log('Scheduled task triggered');
     await checkAllDevicesForUpdates();
-  });
+  // });
   console.log('Device check scheduled to run daily at 5:30 PM PST/PDT');
 };
 

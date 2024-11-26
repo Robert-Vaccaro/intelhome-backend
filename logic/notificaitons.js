@@ -5,7 +5,7 @@ const path = require("path");
 
 const apnProvider = new apn.Provider({
   token: {
-    key: path.resolve(__dirname, "../cert_key2.p8").replace(/\\n/gm, '\n'), // Absolute path to the .p8 file
+    key: env.apnKey.replace(/\\n/gm, '\n'), // Absolute path to the .p8 file
     keyId: env.appleKeyId, // Key ID from Apple Developer account
     teamId: env.appleTeamId, // Team ID from Apple Developer account
   },
