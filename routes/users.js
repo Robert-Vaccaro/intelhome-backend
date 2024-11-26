@@ -40,7 +40,7 @@ router.post("/cred-check", authMiddleware, credCheck); // Check credentials for 
 
 // Account management
 router.post("/save-name", authMiddleware, saveName); // save user's name
-router.delete("/delete-account", authMiddleware, deleteAccount); // Delete user account
+router.delete("/", authMiddleware, deleteAccount); // Delete user account
 
 // Routes for updating notification preferences
 router.put("/email-notifications", authMiddleware, updateEmailNotifications);
