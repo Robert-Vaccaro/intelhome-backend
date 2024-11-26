@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
+const { Types } = require('mongoose');
 
 module.exports = (req, res, next) => {
     const token = req.headers.authorization?.split("Bearer ")[1];
@@ -9,7 +10,7 @@ module.exports = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, env.jwtKey);
         if (decoded && decoded.userId) {
-            req.decodedUserId = decoded.userId;
+            req.decodedUserId = new Types.ObjectId(String(decoded.userId));
             next();
         } else {
             return res.status(401).json({ message: 'Authorization denied: Invalid token' });

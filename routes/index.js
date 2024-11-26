@@ -1,18 +1,9 @@
-const router = require('express').Router();
-const { credCheck, signIn, register, phoneCode, emailCode, refreshToken, checkPhoneCode, checkEmailCode, saveName } = require('../controllers/index.js');
-const authMiddleware = require('../middleware/auth.middleware.js');
+const express = require('express');
+const router = express.Router();
 
+// Render the index.jade view with a title
 router.get('/', (req, res) => {
-    res.render('index', { title: 'PayTab' });
-  });
-router.post('/refresh-token', authMiddleware, refreshToken);
-router.post('/cred-check', authMiddleware, credCheck);
-router.post('/sign-in', signIn);
-router.post('/register', register);
-router.post('/phone-code', authMiddleware, phoneCode);
-router.post('/check-phone-code', authMiddleware, checkPhoneCode);
-router.post('/check-email-code', authMiddleware, checkEmailCode);
-router.post('/email-code', authMiddleware, emailCode);
-router.post('/save-name', authMiddleware, saveName);
+    res.render('index', { title: "IntelHome Server", message: "Welcome to the IntelHome Server!" });
+});
 
 module.exports = router;

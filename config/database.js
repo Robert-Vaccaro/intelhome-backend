@@ -10,5 +10,4 @@ mongoose.connect(env.mongoDd, {
     db.once('open', function() {
     console.log("connected")
 });
-console.log("db")
 module.exports = { db };

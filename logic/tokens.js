@@ -11,7 +11,6 @@ const refreshTokenLife = '7d'; // Refresh token expiration time
  */
 function generateTokens(userId) {
     const payload = { userId : userId };
-
     const accessToken = jwt.sign(
         payload,
         tokenSecret,
