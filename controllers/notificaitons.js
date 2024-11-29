@@ -106,6 +106,7 @@ const checkAllDevicesForUpdates = async () => {
       // Save a single notification for this user summarizing all devices
       const notification = new Notifications({
         userId: user._id,
+        deviceId:  userDevices[0]._id,
         message: fullMsgStr,
       });
       await notification.save();
